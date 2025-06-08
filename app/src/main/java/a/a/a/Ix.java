@@ -673,7 +673,7 @@ public class Ix {
         if (builtInLibraryManager.containsLibrary(BuiltInLibraries.ANDROIDX_ROOM_RUNTIME)) {
             writeAndroidxRoomService(applicationTag);
         }
-        writeAndroidxStartupInitializationProvider(applicationTag);
+        //writeAndroidxStartupInitializationProvider(applicationTag);
         if (builtInLibraryManager.containsLibrary(BuiltInLibraries.ANDROIDX_WORK_RUNTIME)) {
             writeAndroidxWorkRuntimeTags(applicationTag);
         }
