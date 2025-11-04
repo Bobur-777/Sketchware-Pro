@@ -80,15 +80,26 @@ public class ColorsEditorManager {
         if (colorValue.startsWith("#")) {
             return colorValue;
         }
+
         if (colorValue.startsWith("?attr/") || colorValue.startsWith("?")) {
             String attrName = colorValue.startsWith("?attr/") ? colorValue.substring(6) : colorValue.substring(1);
-            return getColorValueFromAttrs(context, attrName, referencingLimit - 1, isNightVariant);
+
+            String resolvedColor = getColorValueFromAttrs(context, attrName, referencingLimit - 1, isNightVariant);
+
+            if (resolvedColor == null || resolvedColor.equals(defaultHexColor)) {
+                resolvedColor = getColorValueFromXml(context, attrName, referencingLimit - 1, isNightVariant);
+            }
+
+            return resolvedColor != null ? resolvedColor : defaultHexColor;
         }
+
         if (colorValue.startsWith("@color/")) {
             return getColorValueFromXml(context, colorValue.substring(7), referencingLimit - 1, isNightVariant);
-        } else if (colorValue.startsWith("@android:color/")) {
+        }
+        else if (colorValue.startsWith("@android:color/")) {
             return getColorValueFromSystem(colorValue, context);
         }
+
         return defaultHexColor;
     }
 
