@@ -268,13 +268,10 @@ public class AddEventActivity extends BaseAppCompatActivity implements View.OnCl
         filteredList.clear();
 
         if (query == null || query.isEmpty()) {
-            // If query is empty, show all items
             filteredList.addAll(sourceList);
         } else {
-            // Filter items based on query
             String lowerCaseQuery = query.toLowerCase();
             for (EventBean event : sourceList) {
-                // Search in target ID, event name, and target type
                 if (event.targetId.toLowerCase().contains(lowerCaseQuery) ||
                         oq.getEventName(event.eventName).toLowerCase().contains(lowerCaseQuery) ||
                         getTargetTypeName(event).toLowerCase().contains(lowerCaseQuery)) {
@@ -629,9 +626,11 @@ public class AddEventActivity extends BaseAppCompatActivity implements View.OnCl
                         notifyDataSetChanged();
                         binding.tvCategory.setText(rs.a(getApplicationContext(), lastSelectedCategory));
                         if (lastSelectedCategory == 4) {
+                            binding.searchInputLayout.setVisibility(View.GONE);
                             binding.moreblockLayout.setVisibility(View.VISIBLE);
                             binding.emptyMessage.setVisibility(View.GONE);
                         } else {
+                            binding.searchInputLayout.setVisibility(View.VISIBLE);
                             binding.moreblockLayout.setVisibility(View.GONE);
                             eventAdapter.setEvents(categories.get(lastSelectedCategory));
                             eventAdapter.notifyDataSetChanged();
