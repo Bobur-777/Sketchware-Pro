@@ -3,6 +3,8 @@ package com.besome.sketch.editor.event;
 import android.animation.Animator;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,6 +62,11 @@ public class AddEventActivity extends BaseAppCompatActivity implements View.OnCl
     private ArrayList<EventBean> addableViewEvents;
     private ArrayList<EventBean> addableComponentEvents;
     private ArrayList<EventBean> addableActivityEvents;
+    private ArrayList<EventBean> filteredActivityEvents;
+    private ArrayList<EventBean> filteredViewEvents;
+    private ArrayList<EventBean> filteredComponentEvents;
+    private ArrayList<EventBean> filteredDrawerViewEvents;
+    private ArrayList<EventBean> filteredEtcEvents;
 
     private LogicPopupAddEventBinding binding;
 
@@ -104,6 +111,12 @@ public class AddEventActivity extends BaseAppCompatActivity implements View.OnCl
         addableDrawerViewEvents.clear();
         addableEtcEvents.clear();
         eventsToAdd.clear();
+
+        filteredActivityEvents = new ArrayList<>();
+        filteredViewEvents = new ArrayList<>();
+        filteredComponentEvents = new ArrayList<>();
+        filteredDrawerViewEvents = new ArrayList<>();
+        filteredEtcEvents = new ArrayList<>();
 
         for (var activityEvent : oq.getAllActivityEvents()) {
             boolean exists = false;
@@ -204,6 +217,19 @@ public class AddEventActivity extends BaseAppCompatActivity implements View.OnCl
                 }
             }
         }
+
+        filteredActivityEvents.addAll(addableActivityEvents);
+        filteredViewEvents.addAll(addableViewEvents);
+        filteredComponentEvents.addAll(addableComponentEvents);
+        filteredDrawerViewEvents.addAll(addableDrawerViewEvents);
+        filteredEtcEvents.addAll(addableEtcEvents);
+
+        categories.put(0, filteredActivityEvents);
+        categories.put(1, filteredViewEvents);
+        categories.put(2, filteredComponentEvents);
+        categories.put(3, filteredDrawerViewEvents);
+        categories.put(4, filteredEtcEvents);
+
         if (categoryAdapter.lastSelectedCategory == -1) {
             eventAdapter.setEvents(categories.get(categoryIndex));
             categoryAdapter.lastSelectedCategory = categoryIndex;
@@ -222,6 +248,55 @@ public class AddEventActivity extends BaseAppCompatActivity implements View.OnCl
         }
         if (eventAdapter != null) {
             eventAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void filterEvents(String query) {
+        filterEventsForCategory(addableActivityEvents, filteredActivityEvents, query);
+        filterEventsForCategory(addableViewEvents, filteredViewEvents, query);
+        filterEventsForCategory(addableComponentEvents, filteredComponentEvents, query);
+        filterEventsForCategory(addableDrawerViewEvents, filteredDrawerViewEvents, query);
+        filterEventsForCategory(addableEtcEvents, filteredEtcEvents, query);
+
+        if (categoryAdapter.lastSelectedCategory != -1 && categoryAdapter.lastSelectedCategory != 4) {
+            eventAdapter.setEvents(categories.get(categoryAdapter.lastSelectedCategory));
+            eventAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void filterEventsForCategory(ArrayList<EventBean> sourceList, ArrayList<EventBean> filteredList, String query) {
+        filteredList.clear();
+
+        if (query == null || query.isEmpty()) {
+            // If query is empty, show all items
+            filteredList.addAll(sourceList);
+        } else {
+            // Filter items based on query
+            String lowerCaseQuery = query.toLowerCase();
+            for (EventBean event : sourceList) {
+                // Search in target ID, event name, and target type
+                if (event.targetId.toLowerCase().contains(lowerCaseQuery) ||
+                        oq.getEventName(event.eventName).toLowerCase().contains(lowerCaseQuery) ||
+                        getTargetTypeName(event).toLowerCase().contains(lowerCaseQuery)) {
+                    filteredList.add(event);
+                }
+            }
+        }
+    }
+
+    private String getTargetTypeName(EventBean event) {
+        switch (event.eventType) {
+            case EventBean.EVENT_TYPE_ACTIVITY:
+                return "Activity";
+            case EventBean.EVENT_TYPE_VIEW:
+            case EventBean.EVENT_TYPE_DRAWER_VIEW:
+                return ViewBean.getViewTypeName(event.targetType);
+            case EventBean.EVENT_TYPE_COMPONENT:
+                return ComponentBean.getComponentName(getApplicationContext(), event.targetType);
+            case EventBean.EVENT_TYPE_ETC:
+                return "ETC";
+            default:
+                return "";
         }
     }
 
@@ -299,11 +374,20 @@ public class AddEventActivity extends BaseAppCompatActivity implements View.OnCl
         addableComponentEvents = new ArrayList<>();
         addableActivityEvents = new ArrayList<>();
         addableDrawerViewEvents = new ArrayList<>();
-        categories.put(0, addableActivityEvents);
-        categories.put(1, addableViewEvents);
-        categories.put(2, addableComponentEvents);
-        categories.put(3, addableDrawerViewEvents);
-        categories.put(4, addableEtcEvents);
+
+        // Initialize filtered lists
+        filteredActivityEvents = new ArrayList<>();
+        filteredViewEvents = new ArrayList<>();
+        filteredComponentEvents = new ArrayList<>();
+        filteredDrawerViewEvents = new ArrayList<>();
+        filteredEtcEvents = new ArrayList<>();
+
+        categories.put(0, filteredActivityEvents);
+        categories.put(1, filteredViewEvents);
+        categories.put(2, filteredComponentEvents);
+        categories.put(3, filteredDrawerViewEvents);
+        categories.put(4, filteredEtcEvents);
+
         binding.eventList.setLayoutManager(new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false));
         eventAdapter = new EventAdapter();
         binding.eventList.setAdapter(eventAdapter);
@@ -320,6 +404,21 @@ public class AddEventActivity extends BaseAppCompatActivity implements View.OnCl
         eventsToAdd = new ArrayList<>();
         binding.eventList.bringToFront();
         overridePendingTransition(R.anim.ani_fade_in, R.anim.ani_fade_out);
+
+        binding.searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                filterEvents(s.toString());
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+        });
     }
 
     @Override
