@@ -1590,7 +1590,7 @@ But, components should be added manually for working correctly."</string>
     <string name="myprojects_settings_version_control_title">Version Control</string>
     <string name="myprojects_settings_version_control_title_code">Code</string>
     <string name="myprojects_settings_version_control_title_name">Name</string>
-    
+
     <string name="theme_section_title">Theme Presets </string>
     <string name="theme_section_description">Choose from predefined themes or generate a random one</string>
     <string name="theme_generate_random">Generate Random</string>
@@ -2135,13 +2135,11 @@ Please try again later"</string>
     <string name="view_widget_favorites_save_title">Save widget to my collection</string>
     <string name="view_widget_delete_title">Delete Widget</string>
     <string name="view_widget_delete_description">Are you sure you want to delete this view and its child elements? \nYou can undo this action if necessary</string>
-    <string name="text_title_menu_resource">Resource Manager</string>
-    <string name="text_title_menu_resource_editor">Resource Editor</string>
-    <string name="text_title_menu_assets">Asset Manager</string>
-    <string name="text_title_menu_permission">Permission Manager</string>
+    <string name="text_title_menu_resource">Resource</string>
+    <string name="text_title_menu_assets">Asset</string>
+    <string name="text_title_menu_permission">Permission</string>
     <string name="text_title_menu_local_library">Local library</string>
-    <string name="text_subtitle_menu_resource">Manage resource files</string>
-    <string name="text_subtitle_menu_resource_editor">Edit resource files</string>
+    <string name="text_subtitle_menu_resource">Import resource files</string>
     <string name="text_subtitle_menu_assets">Import asset files</string>
     <string name="text_subtitle_menu_permission">Add custom permissions</string>
     <string name="text_subtitle_menu_local_library">Add local libraries</string>
@@ -2156,7 +2154,7 @@ Please try again later"</string>
     <string name="component_description_notification">Create notification</string>
     <string name="logic_editor_title_select_component">Select Component</string>
     <string name="component_description_fragment_adapter">FragmentStatePagerAdapter uses with TabLayout and ViewPager to manage each page.</string>
-    <string name="design_drawer_menu_injection">AppCompat Manager</string>
+    <string name="design_drawer_menu_injection">AppCompat</string>
     <string name="design_drawer_menu_injection_subtitle">Modify AppCompat layouts</string>
     <string name="component_description_fb_phone_auth">Firebase Phone is used with Firebase Auth to sign into your app with a phone number</string>
     <string name="component_description_fb_dynamic">Firebase Dynamic Links are smart URLs that allow you to send existing and potential users to any location within your app</string>
@@ -2274,7 +2272,12 @@ Please try again later"</string>
     <string name="property_enter_value">Enter %s value</string>
 
     <string name="code_viewer">Code Viewer</string>
+    <string name="code_editor">Code Editor</string>
     <string name="block_name">Block Name</string>
+
+    <string name="java_parse_error_message">Failed to parse Java code. Please make sure your syntax is correct and doesn’t contain any errors or unsupported patterns. Check the error message for more details</string>
+    <string name="java_parse_show_error">Show error</string>
+    <string name="java_parse_hide_error">Hide error</string>
 
     <string name="resources_manager_xml_load_failed_message">data loading failed in \"%s\" \nPlease open the code editor to fix the issue manually</string>
     <string name="resources_manager_xml_load_failed_title">Data Loading Failed</string>

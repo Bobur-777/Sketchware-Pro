@@ -123,6 +123,8 @@ dependencies {
         exclude group: "com.google.guava", module: "guava"
     }
 
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.26.4'
+
     // Analytics and Crashlytics
     if (analyticsEnabled) {
         new File("$projectDir/google-services.json").text = secrets
