@@ -1,10 +1,5 @@
 package com.besome.sketch.editor;
 
-import static mod.bobur.StringEditorActivity.convertListMapToXml;
-import static mod.bobur.StringEditorActivity.convertXmlToListMap;
-import static mod.bobur.StringEditorActivity.isXmlStringsContains;
-import static pro.sketchware.widgets.WidgetsCreatorManager.clearErrorOnTextChanged;
-
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -115,9 +110,7 @@ import a.a.a.uq;
 import a.a.a.wB;
 import a.a.a.xB;
 import a.a.a.yq;
-import a.a.a.yy;
 import dev.aldi.sayuti.block.ExtraPaletteBlock;
-import mod.bobur.StringEditorActivity;
 import mod.bobur.XmlToSvgConverter;
 import mod.hey.studios.editor.view.IdGenerator;
 import mod.hey.studios.moreblock.ReturnMoreblockManager;
@@ -130,17 +123,13 @@ import mod.jbk.util.BlockUtil;
 import mod.jbk.util.LogUtil;
 import mod.pranav.viewbinding.ViewBindingBuilder;
 import pro.sketchware.R;
-import pro.sketchware.activities.editor.view.JavaEventCodeEditorActivity;
 import pro.sketchware.activities.editor.view.CodeViewerActivity;
+import pro.sketchware.activities.editor.view.JavaEventCodeEditorActivity;
 import pro.sketchware.activities.resourceseditor.ResourcesEditorActivity;
 import pro.sketchware.databinding.ImagePickerItemBinding;
-import pro.sketchware.databinding.PropertyPopupSelectorSingleBinding;
 import pro.sketchware.databinding.SearchWithRecyclerViewBinding;
-import pro.sketchware.databinding.ViewStringEditorAddBinding;
 import pro.sketchware.menu.ExtraMenuBean;
 import pro.sketchware.utility.FilePathUtil;
-import pro.sketchware.utility.FileUtil;
-import pro.sketchware.utility.SketchwareUtil;
 import pro.sketchware.utility.SvgUtils;
 
 @SuppressLint({"ClickableViewAccessibility", "RtlHardcoded", "SetTextI18n", "DefaultLocale"})
@@ -155,6 +144,7 @@ public class LogicEditorActivity extends BaseAppCompatActivity implements View.O
     public String scId = "";
     public String id = "";
     public String eventName = "";
+    private String eventTitle;
     private Vibrator vibrator;
     private LinearLayout J, K;
     private FloatingActionButton openBlocksMenuButton;
@@ -176,7 +166,7 @@ public class LogicEditorActivity extends BaseAppCompatActivity implements View.O
                 if (result.getResultCode() == Activity.RESULT_OK) {
                     Intent data = result.getData();
                     if (data != null) {
-                        // TODO: just for testing
+                        // Reload logic blocks when returning from Java editor
                         Intent intent = getIntent();
                         intent.putExtra("beans", data.getSerializableExtra("block_beans"));
                         finish();
@@ -184,8 +174,6 @@ public class LogicEditorActivity extends BaseAppCompatActivity implements View.O
                     }
                 }
             });
-
-
     private Rs w;
     private float posInitY, posInitX, s, t;
     private int minDist, S, x, y;
@@ -217,7 +205,11 @@ public class LogicEditorActivity extends BaseAppCompatActivity implements View.O
 
     private void loadEventBlocks() {
         crashlytics.log("Loading event blocks");
-        ArrayList<BlockBean> eventBlocks = jC.a(scId).a(M.getJavaName(), id + "_" + eventName);
+        // Load blocks from intent extras if available (from Java editor), otherwise from storage
+        ArrayList<BlockBean> eventBlocks = getIntent().hasExtra("beans") ?
+                (ArrayList<BlockBean>) getIntent().getSerializableExtra("beans") :
+                jC.a(scId).a(M.getJavaName(), id + "_" + eventName);
+
         if (eventBlocks != null) {
             if (eventBlocks.isEmpty()) {
                 runOnUiThread(() -> e(X));
@@ -1926,6 +1918,7 @@ public class LogicEditorActivity extends BaseAppCompatActivity implements View.O
         g(configuration.orientation);
     }
 
+    @SuppressLint("MissingInflatedId")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -2015,11 +2008,11 @@ public class LogicEditorActivity extends BaseAppCompatActivity implements View.O
         } else {
             title = xB.b().a(getContext(), id, eventName);
         }
-        String e1 = title;
+        eventTitle = title;
 
-        o.a(e1, eventName);
+        o.a(eventTitle, eventName);
 
-        ArrayList<String> spec = FB.c(e1);
+        ArrayList<String> spec = FB.c(eventTitle);
         int blockId = 0;
         for (int i = 0; i < spec.size(); i++) {
             String specBit = spec.get(i);
@@ -2474,16 +2467,15 @@ public class LogicEditorActivity extends BaseAppCompatActivity implements View.O
         yq yq = new yq(this, scId);
         yq.a(jC.c(scId), jC.b(scId), jC.a(scId));
         String code = new Fx(M.getActivityName(), yq.N, o.getBlocks(), isViewBindingEnabled).a();
+
+        // Use JavaEventCodeEditorActivity instead of CodeViewerActivity for Java editor functionality
         var intent = new Intent(this, JavaEventCodeEditorActivity.class);
         intent.putExtra("javaName", M.getJavaName());
         intent.putExtra("xmlName", M.getXmlName());
-        intent.putExtra("eventName", D);
+        intent.putExtra("eventName", eventName);
         intent.putExtra("eventTitle", eventTitle);
         intent.putExtra("code", code);
         intent.putExtra("sc_id", scId);
-        intent.putExtra("scheme", CodeViewerActivity.SCHEME_JAVA);
-        startActivity(intent);
-        intent.putExtra("sc_id", B);
         intent.putExtra("old_beans", o.getBlocks());
         javaEditorResultLauncher.launch(intent);
     }
