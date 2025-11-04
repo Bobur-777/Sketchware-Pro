@@ -19,10 +19,8 @@
             android:layout_height="wrap_content"
             android:hint="Search for libraries"
             android:importantForAutofill="noExcludeDescendants"
-            app:boxCornerRadiusBottomEnd="50dp"
-            app:boxCornerRadiusBottomStart="50dp"
-            app:boxCornerRadiusTopEnd="50dp"
-            app:boxCornerRadiusTopStart="50dp"
+            app:endIconDrawable="@drawable/ic_mtrl_close"
+            app:endIconMode="clear_text"
             app:startIconDrawable="@drawable/search_icon_grey">
 
             <com.google.android.material.textfield.TextInputEditText

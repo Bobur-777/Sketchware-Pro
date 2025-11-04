@@ -38,6 +38,8 @@
                 android:hint="Search for permissions"
                 android:importantForAutofill="noExcludeDescendants"
                 app:boxBackgroundMode="outline"
+                app:endIconDrawable="@drawable/ic_mtrl_close"
+                app:endIconMode="clear_text"
                 app:startIconDrawable="@drawable/ic_mtrl_search">
 
                 <com.google.android.material.textfield.TextInputEditText

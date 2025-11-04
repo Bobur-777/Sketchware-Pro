@@ -18,11 +18,25 @@
         android:gravity="center"
         android:text="@string/component_title_add_component" />
 
-    <com.google.android.material.divider.MaterialDivider
-        android:id="@+id/divider_top"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:dividerColor="?attr/colorSurfaceContainerHighest" />
+        android:layout_marginHorizontal="20dp"
+        android:hint="Search for components"
+        android:importantForAutofill="noExcludeDescendants"
+        app:boxBackgroundMode="outline"
+        app:endIconDrawable="@drawable/ic_mtrl_close"
+        app:endIconMode="clear_text"
+        app:startIconDrawable="@drawable/ic_mtrl_search">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/component_list"
@@ -36,11 +50,5 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:itemCount="4"
         tools:listitem="@layout/component_add_item" />
-
-    <com.google.android.material.divider.MaterialDivider
-        android:id="@+id/divider_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:dividerColor="?attr/colorSurfaceContainerHighest" />
 
 </LinearLayout>

@@ -1,6 +1,8 @@
 package com.besome.sketch.editor.component;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +34,9 @@ public class AddComponentBottomSheet extends BottomSheetDialogFragment {
     private ProjectFileBean projectFileBean;
 
     private ArrayList<ComponentBean> componentList;
+    private ArrayList<ComponentBean> filteredComponentList;
     private LogicAddComponentBinding binding;
+    private ComponentsAdapter adapter;
     private OnComponentCreateListener onComponentCreateListener;
 
     public static AddComponentBottomSheet newInstance(String scId, ProjectFileBean projectFileBean, OnComponentCreateListener onComponentCreateListener) {
@@ -58,6 +62,9 @@ public class AddComponentBottomSheet extends BottomSheetDialogFragment {
 
     private void initializeComponentBeans() {
         componentList = new ArrayList<>();
+        filteredComponentList = new ArrayList<>();
+
+        // Basic Components
         componentList.add(new ComponentBean(ComponentBean.COMPONENT_TYPE_INTENT));
         componentList.add(new ComponentBean(ComponentBean.COMPONENT_TYPE_SHAREDPREF));
         componentList.add(new ComponentBean(ComponentBean.COMPONENT_TYPE_FILE_PICKER));
@@ -94,6 +101,7 @@ public class AddComponentBottomSheet extends BottomSheetDialogFragment {
         componentList.add(new ComponentBean(ComponentBean.COMPONENT_TYPE_FIREBASE_AUTH_GOOGLE_LOGIN));
 
         ComponentsHandler.add(componentList);
+        filteredComponentList.addAll(componentList);
     }
 
     @Nullable
@@ -112,22 +120,45 @@ public class AddComponentBottomSheet extends BottomSheetDialogFragment {
         flexboxLayoutManager.setAlignItems(AlignItems.CENTER);
 
         binding.title.setText(Helper.getResString(R.string.component_title_add_component));
+        adapter = new ComponentsAdapter();
         binding.componentList.setHasFixedSize(true);
-        binding.componentList.setAdapter(new ComponentsAdapter());
+        binding.componentList.setAdapter(adapter);
         binding.componentList.setLayoutManager(flexboxLayoutManager);
 
-        binding.componentList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        binding.searchInput.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                FlexboxLayoutManager lm = (FlexboxLayoutManager) recyclerView.getLayoutManager();
-                if (lm == null) return;
-                int first = lm.findFirstCompletelyVisibleItemPosition();
-                int last = lm.findLastCompletelyVisibleItemPosition();
-                int total = binding.componentList.getAdapter().getItemCount();
-                binding.dividerTop.setVisibility(first > 0 ? View.VISIBLE : View.GONE);
-                binding.dividerBottom.setVisibility(last < total - 1 ? View.VISIBLE : View.GONE);
+            public void afterTextChanged(Editable s) {
+                filterComponents(s.toString());
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Not needed
             }
         });
+    }
+
+    private void filterComponents(String query) {
+        filteredComponentList.clear();
+        if (query.isEmpty()) {
+            filteredComponentList.addAll(componentList);
+        } else {
+            String lowerCaseQuery = query.toLowerCase();
+            for (ComponentBean component : componentList) {
+                String componentName = ComponentBean.getComponentName(requireContext(), component.type).toLowerCase();
+                if (componentName.contains(lowerCaseQuery)) {
+                    filteredComponentList.add(component);
+                }
+            }
+        }
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -135,6 +166,7 @@ public class AddComponentBottomSheet extends BottomSheetDialogFragment {
         super.onDestroyView();
         binding = null;
         onComponentCreateListener = null;
+        adapter = null;
     }
 
     @Override
@@ -162,6 +194,7 @@ public class AddComponentBottomSheet extends BottomSheetDialogFragment {
     }
 
     private class ComponentsAdapter extends RecyclerView.Adapter<ComponentsAdapter.ComponentBeanViewHolder> {
+
         @Override
         public long getItemId(int position) {
             return position;
@@ -169,7 +202,7 @@ public class AddComponentBottomSheet extends BottomSheetDialogFragment {
 
         @Override
         public void onBindViewHolder(@NonNull ComponentBeanViewHolder holder, int position) {
-            var componentBean = componentList.get(position);
+            ComponentBean componentBean = filteredComponentList.get(position);
             holder.bind(componentBean);
         }
 
@@ -182,7 +215,7 @@ public class AddComponentBottomSheet extends BottomSheetDialogFragment {
 
         @Override
         public int getItemCount() {
-            return componentList.size();
+            return filteredComponentList.size();
         }
 
         private class ComponentBeanViewHolder extends RecyclerView.ViewHolder {
