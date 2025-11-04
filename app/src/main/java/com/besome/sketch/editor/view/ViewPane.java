@@ -232,7 +232,7 @@ public class ViewPane extends RelativeLayout {
         svgUtils = new SvgUtils(context);
         svgUtils.initImageLoader();
         if (viewEditorThemeOverlay == R.style.ThemeOverlay_SketchwarePro_ViewEditor) {
-            setBackgroundColor(Color.WHITE);
+            setBackground(AppCompatResources.getDrawable(context, R.drawable.bg_view_pane_default));
         } else if (isPreviewMode) {
             setBackgroundColor(ThemeUtils.getColor(context, R.attr.colorSurface));
         } else {
