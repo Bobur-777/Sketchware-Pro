@@ -123,7 +123,7 @@ public class DesignDrawer extends LinearLayout {
         addDrawerItem(R.id.item_font_manager, R.drawable.ic_mtrl_font, R.string.design_drawer_menu_title_font, R.string.design_drawer_menu_description_font, content);
         addDrawerItem(R.id.item_java_manager, R.drawable.ic_mtrl_java, R.string.text_title_menu_java, R.string.text_subtitle_menu_java, content);
         addDrawerItem(R.id.item_resource_manager, R.drawable.ic_mtrl_folder, R.string.text_title_menu_resource, R.string.text_subtitle_menu_resource, content);
-        addDrawerItem(R.id.item_resource_editor, R.drawable.ic_mtrl_folder_code, R.string.text_title_menu_resource_editor, R.string.text_subtitle_menu_resource_editor, content);
+        addDrawerItem(R.id.item_resource_editor, R.drawable.ic_mtrl_folder_code, R.string.design_actionbar_title_manager_resources, R.string.design_actionbar_title_manager_resources, content);
         addDrawerItem(R.id.item_assets_manager, R.drawable.ic_mtrl_file_present, R.string.text_title_menu_assets, R.string.text_subtitle_menu_assets, content);
         addDrawerItem(R.id.item_permission_manager, R.drawable.ic_mtrl_shield_check, R.string.text_title_menu_permission, R.string.text_subtitle_menu_permission, content);
         addDrawerItem(R.id.item_appcompat_manager, R.drawable.ic_mtrl_inject, R.string.design_drawer_menu_injection, R.string.design_drawer_menu_injection_subtitle, content);
