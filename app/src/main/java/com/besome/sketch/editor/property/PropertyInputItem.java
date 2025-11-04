@@ -246,7 +246,7 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
             binding.slider.setCentered(true);
         }
 
-        binding.slider.setValue(minValue);
+        binding.slider.setValue(validCurrentValue);
 
         binding.edInput.setText(isInteger ? String.valueOf((int) validCurrentValue) : String.valueOf(validCurrentValue));
         binding.tiInput.setHint(String.format(Helper.getResString(R.string.property_enter_value), propertyName));
@@ -351,27 +351,6 @@ public class PropertyInputItem extends RelativeLayout implements View.OnClickLis
         AlertDialog alertDialog = dialog.create();
 
         alertDialog.setOnShowListener(dialogInterface -> {
-            float animationStartValue;
-            if (key.equals("property_translation_x") || key.equals("property_translation_y") || key.equals("property_rotate")) {
-                animationStartValue = 0f;
-            } else {
-                animationStartValue = minValue;
-            }
-
-            ValueAnimator sliderAnimator = ValueAnimator.ofFloat(animationStartValue, validCurrentValue);
-            sliderAnimator.setDuration(800);
-            sliderAnimator.setInterpolator(new DecelerateInterpolator());
-
-            sliderAnimator.addUpdateListener(animation -> {
-                float animatedValue = (float) animation.getAnimatedValue();
-                float validAnimatedValue = Math.round(animatedValue / stepSize) * stepSize;
-                validAnimatedValue = Math.max(minValue, Math.min(maxValue, validAnimatedValue));
-                binding.slider.setValue(validAnimatedValue);
-                updateValueDisplay(binding.tvCurrentValue, validAnimatedValue, isInteger);
-            });
-
-            sliderAnimator.start();
-
             Button customButton = alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL);
             Button resetButton = alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
 
