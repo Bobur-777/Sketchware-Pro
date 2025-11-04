@@ -4,10 +4,8 @@ def analyticsEnabled = secrets != null
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 
-if (analyticsEnabled) {
-    apply plugin: "com.google.gms.google-services"
-    apply plugin: "com.google.firebase.crashlytics"
-}
+apply plugin: "com.google.gms.google-services"
+apply plugin: "com.google.firebase.crashlytics"
 
 android {
     compileSdk = 36
