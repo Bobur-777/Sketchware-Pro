@@ -70,21 +70,6 @@ public class BlockSelectorManagerFragment extends qA {
         adapter.submitList(selectors);
 
         binding.createNew.setOnClickListener(v -> showCreateEditDialog(0, false));
-
-        {
-            View view1 = binding.appBarLayout;
-            int left = view1.getPaddingLeft();
-            int top = view1.getPaddingTop();
-            int right = view1.getPaddingRight();
-            int bottom = view1.getPaddingBottom();
-
-            ViewCompat.setOnApplyWindowInsetsListener(view1, (v, i) -> {
-                Insets insets = i.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
-                v.setPadding(left + insets.left, top + insets.top, right + insets.right, bottom + insets.bottom);
-                return i;
-            });
-        }
-
         {
             View view1 = binding.content;
             int left = view1.getPaddingLeft();

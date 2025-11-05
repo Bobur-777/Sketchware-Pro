@@ -16,7 +16,8 @@
         <ImageView
             android:id="@+id/event_icon"
             android:layout_width="28dp"
-            android:layout_height="28dp" />
+            android:layout_height="28dp"
+            android:src="@drawable/ic_mtrl_code"/>
     </LinearLayout>
 
     <LinearLayout

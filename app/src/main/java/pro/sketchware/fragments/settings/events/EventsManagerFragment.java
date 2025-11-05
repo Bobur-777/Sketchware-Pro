@@ -84,20 +84,6 @@ public class EventsManagerFragment extends qA {
         refreshList();
 
         {
-            View view1 = binding.appBarLayout;
-            int left = view1.getPaddingLeft();
-            int top = view1.getPaddingTop();
-            int right = view1.getPaddingRight();
-            int bottom = view1.getPaddingBottom();
-
-            ViewCompat.setOnApplyWindowInsetsListener(view1, (v, i) -> {
-                Insets insets = i.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
-                v.setPadding(left + insets.left, top + insets.top, right + insets.right, bottom + insets.bottom);
-                return i;
-            });
-        }
-
-        {
             View view1 = binding.content;
             int left = view1.getPaddingLeft();
             int top = view1.getPaddingTop();
@@ -305,7 +291,6 @@ public class EventsManagerFragment extends qA {
             String name = (String) item.get("name");
             holder.itemView.setBackgroundResource(UI.getShapedBackgroundForList(dataArray, position));
 
-            holder.binding.eventIcon.setImageResource(R.drawable.event_on_response_48dp);
             ((LinearLayout) holder.binding.eventIcon.getParent()).setGravity(Gravity.CENTER);
 
             holder.binding.eventTitle.setText(name);
