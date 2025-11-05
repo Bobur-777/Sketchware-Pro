@@ -3,6 +3,7 @@ package pro.sketchware.utility;
 import static pro.sketchware.utility.ThemeUtils.isDarkThemeEnabled;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 
@@ -73,7 +74,7 @@ public class EditorUtils {
             editor.setColorScheme(isTextMate ?
                     CodeEditorColorSchemes.loadTextMateColorScheme(CodeEditorColorSchemes.THEME_GITHUB) : new EditorColorScheme());
         }
-        editor.setColorScheme(getMaterialStyledScheme(editor));
+//        editor.setColorScheme(getMaterialStyledScheme(editor));
         editor.setPinLineNumber(true);
     }
 }
