@@ -23,7 +23,7 @@ class ViewBindingBuilder(
 
         val content = """
 // Generated file. Do not modify.
-package $packageName;
+package $packageName.databinding;
 
 ${generateImports(views, rootView)}
 
@@ -107,6 +107,7 @@ ${
             "import android.view.View;",
             "import android.view.LayoutInflater;",
             "import android.view.ViewGroup;",
+            "import " + packageName + ".R;",
             "import ${rootView.fullType};"
         )
 

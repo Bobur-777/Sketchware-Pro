@@ -39,6 +39,11 @@ public class ProjectSettings {
     public static final String SETTING_ENABLE_VIEWBINDING = "enable_viewbinding";
 
     /**
+     * Setting to enable subpackaging in the project
+     */
+    public static final String SETTING_ENABLE_SUBPACKAGING = "enable_subpackaging";
+
+    /**
      * Setting for the final app's {@link Application} class
      *
      * @see Application

@@ -9,6 +9,7 @@ import com.besome.sketch.beans.BlockBean;
 import com.besome.sketch.beans.ComponentBean;
 import com.besome.sketch.beans.ProjectFileBean;
 import com.besome.sketch.beans.ViewBean;
+import com.besome.sketch.design.DesignActivity;
 import com.besome.sketch.editor.manage.library.material3.Material3LibraryManager;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class Jx {
     private final jq buildConfig;
     private final Ox ox;
     private final Boolean isViewBindingEnabled;
+    private final Boolean enableSubpackaging;
     /**
      * Fields with static initializer that added Components need,
      * e.g. {"private Timer _timer = new Timer();"}
@@ -97,6 +99,8 @@ public class Jx {
         ox = new Ox(buildConfig, projectFileBean);
         extraBlocks = getExtraBlockData();
         isViewBindingEnabled = settings.getValue(ProjectSettings.SETTING_ENABLE_VIEWBINDING, BuildSettings.SETTING_GENERIC_VALUE_FALSE)
+                .equals(BuildSettings.SETTING_GENERIC_VALUE_TRUE);
+        enableSubpackaging = settings.getValue(ProjectSettings.SETTING_ENABLE_SUBPACKAGING, BuildSettings.SETTING_GENERIC_VALUE_FALSE)
                 .equals(BuildSettings.SETTING_GENERIC_VALUE_TRUE);
         materialLibraryManager = new Material3LibraryManager(projectDataManager.a);
     }
@@ -174,6 +178,15 @@ public class Jx {
         boolean isBottomDialogFragment = projectFileBean.fileName.contains("_bottomdialog_fragment");
         boolean isFragment = projectFileBean.fileName.contains("_fragment");
 
+        String finalPackageName = packageName;
+        if (enableSubpackaging) {
+            if (isFragment || isDialogFragment || isBottomDialogFragment) {
+                finalPackageName = packageName + ".fragment";
+            } else {
+                finalPackageName = packageName + ".activity";
+            }
+        }
+
         extraVariables();
         handleAppCompat();
         addFieldsDeclaration();
@@ -186,7 +199,7 @@ public class Jx {
         addLocalLibraryImports();
 
         StringBuilder sb = new StringBuilder(8192);
-        sb.append("package ").append(packageName).append(";").append(EOL)
+        sb.append("package ").append(finalPackageName).append(";").append(EOL)
                 .append(EOL);
         if (projectFileBean.getActivityName().equals("MainActivity")) {
             sb.append(getLauncherActivity(packageName));
@@ -205,6 +218,9 @@ public class Jx {
             addImport("androidx.fragment.app.Fragment");
             addImport("androidx.fragment.app.FragmentManager");
             addImport("androidx.fragment.app.DialogFragment");
+            if (hasFragmentsInProject() && !isFragment && !isDialogFragment && !isBottomDialogFragment) {
+                addImport(packageName + ".fragment.*");
+            }
             if (isBottomDialogFragment) {
                 addImport("com.google.android.material.bottomsheet.BottomSheetDialogFragment");
             }
@@ -221,8 +237,12 @@ public class Jx {
             addImport("android.Manifest");
             addImport("android.content.pm.PackageManager");
         }
-        if (isAndroidStudioExport && isViewBindingEnabled) {
-            addImport(packageName + ".databinding.*");
+        if (isViewBindingEnabled) {
+            if (enableSubpackaging) {
+                addImport(packageName + ".databinding.*");
+            } else {
+                addImport(finalPackageName + ".databinding.*");
+            }
         }
 
         removeExtraImports();
@@ -1141,6 +1161,28 @@ public class Jx {
                     true; // it's necessary for the adapters, listeners...
             default -> false;
         };
+    }
+
+    private boolean hasFragmentsInProject() {
+        try {
+            ArrayList<String> screenNames = new ArrayList<>();
+            ArrayList<ProjectFileBean> activities = jC.b(DesignActivity.sc_id).b();
+            if (activities != null) {
+                for (ProjectFileBean projectFileBean : activities) {
+                    screenNames.add(projectFileBean.fileName);
+                }
+            }
+            for (String fileName : screenNames) {
+                if (fileName != null &&
+                        (fileName.contains("_fragment") ||
+                                fileName.contains("_dialog_fragment") ||
+                                fileName.contains("_bottomdialog_fragment"))) {
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
     }
 
     /**

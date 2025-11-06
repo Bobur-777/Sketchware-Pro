@@ -41,12 +41,15 @@ public class ProjectSettingsDialog {
 
         binding.cbEnableViewbinding.setChecked(
                 settings.getValue(ProjectSettings.SETTING_ENABLE_VIEWBINDING, "false").equals("true"));
+        binding.cbEnableSubpackaging.setChecked(
+                settings.getValue(ProjectSettings.SETTING_ENABLE_SUBPACKAGING, "false").equals("true"));
         binding.cbRemoveOldMethods.setChecked(
                 settings.getValue(ProjectSettings.SETTING_DISABLE_OLD_METHODS, "true").equals("true"));
         binding.cbUseNewMaterialComponentsAppTheme.setChecked(
                 settings.getValue(ProjectSettings.SETTING_ENABLE_BRIDGELESS_THEMES, "false").equals("true"));
 
         binding.enableViewbinding.setOnClickListener(v -> binding.cbEnableViewbinding.performClick());
+        binding.enableSubpackaging.setOnClickListener(v -> binding.cbEnableSubpackaging.performClick());
         binding.removeOldMethods.setOnClickListener(v -> binding.cbRemoveOldMethods.performClick());
         binding.useNewMaterialComponentsAppTheme.setOnClickListener(v -> binding.cbUseNewMaterialComponentsAppTheme.performClick());
 
@@ -54,6 +57,7 @@ public class ProjectSettingsDialog {
         binding.etTargetSdkVersion.setTag(ProjectSettings.SETTING_TARGET_SDK_VERSION);
         binding.etApplicationClassName.setTag(ProjectSettings.SETTING_APPLICATION_CLASS);
         binding.cbEnableViewbinding.setTag(ProjectSettings.SETTING_ENABLE_VIEWBINDING);
+        binding.cbEnableSubpackaging.setTag(ProjectSettings.SETTING_ENABLE_SUBPACKAGING);
         binding.cbRemoveOldMethods.setTag(ProjectSettings.SETTING_DISABLE_OLD_METHODS);
         binding.cbUseNewMaterialComponentsAppTheme.setTag(ProjectSettings.SETTING_ENABLE_BRIDGELESS_THEMES);
 
@@ -64,6 +68,7 @@ public class ProjectSettingsDialog {
                 binding.etTargetSdkVersion,
                 binding.etApplicationClassName,
                 binding.cbEnableViewbinding,
+                binding.cbEnableSubpackaging,
                 binding.cbRemoveOldMethods,
                 binding.cbUseNewMaterialComponentsAppTheme
         };

@@ -522,7 +522,18 @@ public class Ix {
                 XmlBuilder activityTag = new XmlBuilder("activity");
 
                 String javaName = projectFileBean.getJavaName();
-                activityTag.addAttribute("android", "name", "." + javaName.substring(0, javaName.indexOf(".java")));
+                String activityClassName = javaName.substring(0, javaName.indexOf(".java"));
+
+                // Apply subpackaging logic to regular activities
+                String fullActivityName;
+                if (settings.getValue(ProjectSettings.SETTING_ENABLE_SUBPACKAGING, ProjectSettings.SETTING_GENERIC_VALUE_FALSE)
+                        .equals(ProjectSettings.SETTING_GENERIC_VALUE_TRUE)) {
+                    fullActivityName = ".activity." + activityClassName;
+                } else {
+                    fullActivityName = "." + activityClassName;
+                }
+
+                activityTag.addAttribute("android", "name", fullActivityName);
 
                 if (!AndroidManifestInjector.getActivityAttrs(activityTag, c.sc_id, projectFileBean.getJavaName())) {
                     activityTag.addAttribute("android", "configChanges", "orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout");
@@ -667,6 +678,13 @@ public class Ix {
     }
 
     private void writeJava(XmlBuilder applicationTag, String activityName, ArrayList<HashMap<String, Object>> activityAttrs) {
+        String fullActivityName = activityName;
+
+        if (settings.getValue(ProjectSettings.SETTING_ENABLE_SUBPACKAGING, ProjectSettings.SETTING_GENERIC_VALUE_FALSE)
+                .equals(ProjectSettings.SETTING_GENERIC_VALUE_TRUE)) {
+            fullActivityName = "activity." + activityName;
+        }
+
         XmlBuilder activityTag = new XmlBuilder("activity");
         boolean specifiedActivityName = false;
         boolean specifiedConfigChanges = false;
@@ -675,21 +693,24 @@ public class Ix {
                 Object nameObject = hashMap.get("name");
                 Object valueObject = hashMap.get("value");
                 if (nameObject instanceof String && valueObject instanceof String) {
-                    String name = nameObject.toString();
-                    String value = valueObject.toString();
-                    if (name.equals(activityName)) {
-                        activityTag.addAttributeValue(value);
-                        if (value.contains("android:name=")) {
-                            specifiedActivityName = true;
-                        } else if (value.contains("android:configChanges=")) {
-                            specifiedConfigChanges = true;
-                        }
+                    String attributeName = nameObject.toString();
+                    String attributeValue = valueObject.toString();
+
+                    if (attributeName.equals("android:name")) {
+                        specifiedActivityName = true;
+                        activityTag.addAttribute("android", "name", attributeValue);
+                    } else if (attributeName.equals("android:configChanges")) {
+                        specifiedConfigChanges = true;
+                        activityTag.addAttribute("android", "configChanges", attributeValue);
+                    } else {
+                        String cleanName = attributeName.replace("android:", "");
+                        activityTag.addAttribute("android", cleanName, attributeValue);
                     }
                 }
             }
         }
         if (!specifiedActivityName) {
-            activityTag.addAttribute("android", "name", activityName);
+            activityTag.addAttribute("android", "name", "." + fullActivityName);
         }
         if (!specifiedConfigChanges) {
             activityTag.addAttribute("android", "configChanges", "orientation|screenSize");
