@@ -153,7 +153,7 @@ ${
                             views.add(
                                 View(
                                     generateFileNameForLayout(layout),
-                                    packageName + "." + generateFileNameForLayout(layout),
+                                    packageName + ".databinding." + "." + generateFileNameForLayout(layout),
                                     id.nodeValue.substringAfter("/"),
                                     true
                                 )

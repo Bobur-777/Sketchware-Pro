@@ -218,7 +218,7 @@ public class Jx {
             addImport("androidx.fragment.app.Fragment");
             addImport("androidx.fragment.app.FragmentManager");
             addImport("androidx.fragment.app.DialogFragment");
-            if (hasFragmentsInProject() && !isFragment && !isDialogFragment && !isBottomDialogFragment) {
+            if (settings.getValue(ProjectSettings.SETTING_ENABLE_SUBPACKAGING, ProjectSettings.SETTING_GENERIC_VALUE_FALSE).equals(ProjectSettings.SETTING_GENERIC_VALUE_TRUE) && hasFragmentsInProject() && !isFragment && !isDialogFragment && !isBottomDialogFragment) {
                 addImport(packageName + ".fragment.*");
             }
             if (isBottomDialogFragment) {
