@@ -145,21 +145,6 @@ public class Jx {
         imports = newImports;
     }
 
-    /**
-     * @return Import to be added to the currently generating class
-     * (includes import of default launcher activity)
-     */
-    private String getLauncherActivity(String packageName) {
-        String theImport = "";
-
-        String activityName = ProjectFileBean.getActivityName(AndroidManifestInjector.getLauncherActivity(projectDataManager.a));
-        if (!activityName.equals("MainActivity")) {
-            theImport = "import " + packageName + "." + activityName + ";" + EOL;
-        }
-
-        return theImport;
-    }
-
     private String getBillingResponseCode(ConstVarComponent component) {
         HashMap<String, ArrayList<String>> param = component.param;
         if (param == null || !param.containsKey("OnResultBillingResponse")) {
@@ -201,9 +186,6 @@ public class Jx {
         StringBuilder sb = new StringBuilder(8192);
         sb.append("package ").append(finalPackageName).append(";").append(EOL)
                 .append(EOL);
-        if (projectFileBean.getActivityName().equals("MainActivity")) {
-            sb.append(getLauncherActivity(packageName));
-        }
 
         if (buildConfig.isFirebaseEnabled) addImport("com.google.firebase.FirebaseApp");
 
@@ -238,13 +220,11 @@ public class Jx {
             addImport("android.content.pm.PackageManager");
         }
         if (isViewBindingEnabled) {
-            if (enableSubpackaging) {
-                addImport(packageName + ".databinding.*");
-            } else {
-                addImport(finalPackageName + ".databinding.*");
-            }
+            addImport(packageName + ".databinding.*");
         }
-
+        if (enableSubpackaging) {
+            addImport(packageName + ".R");
+        }
         removeExtraImports();
         Collections.sort(imports);
         for (String anImport : imports) {
