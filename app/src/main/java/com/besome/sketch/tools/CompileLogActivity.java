@@ -1,6 +1,8 @@
 package com.besome.sketch.tools;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -42,9 +44,6 @@ public class CompileLogActivity extends BaseAppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = CompileLogBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.optionsLayout,
-                new AddMarginOnApplyWindowInsetsListener(WindowInsetsCompat.Type.navigationBars(), WindowInsetsCompat.CONSUMED));
 
         logViewerPreferences = getPreferences(Context.MODE_PRIVATE);
 
@@ -107,6 +106,10 @@ public class CompileLogActivity extends BaseAppCompatActivity {
         });
 
         binding.formatButton.setOnClickListener(v -> options.show());
+        binding.copyButton.setOnClickListener(v -> {
+            ((ClipboardManager) getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("clipboard", binding.tvCompileLog.getText()));
+            SketchwareUtil.toast("Copied to clipboard.");
+        });
 
         applyLogViewerPreferences();
 
