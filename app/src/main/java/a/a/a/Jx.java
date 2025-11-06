@@ -200,9 +200,6 @@ public class Jx {
             addImport("androidx.fragment.app.Fragment");
             addImport("androidx.fragment.app.FragmentManager");
             addImport("androidx.fragment.app.DialogFragment");
-            if (settings.getValue(ProjectSettings.SETTING_ENABLE_SUBPACKAGING, ProjectSettings.SETTING_GENERIC_VALUE_FALSE).equals(ProjectSettings.SETTING_GENERIC_VALUE_TRUE) && hasFragmentsInProject() && !isFragment && !isDialogFragment && !isBottomDialogFragment) {
-                addImport(packageName + ".fragment.*");
-            }
             if (isBottomDialogFragment) {
                 addImport("com.google.android.material.bottomsheet.BottomSheetDialogFragment");
             }
@@ -222,9 +219,7 @@ public class Jx {
         if (isViewBindingEnabled) {
             addImport(packageName + ".databinding.*");
         }
-        if (enableSubpackaging) {
-            addImport(packageName + ".R");
-        }
+
         removeExtraImports();
         Collections.sort(imports);
         for (String anImport : imports) {
@@ -1141,28 +1136,6 @@ public class Jx {
                     true; // it's necessary for the adapters, listeners...
             default -> false;
         };
-    }
-
-    private boolean hasFragmentsInProject() {
-        try {
-            ArrayList<String> screenNames = new ArrayList<>();
-            ArrayList<ProjectFileBean> activities = jC.b(DesignActivity.sc_id).b();
-            if (activities != null) {
-                for (ProjectFileBean projectFileBean : activities) {
-                    screenNames.add(projectFileBean.fileName);
-                }
-            }
-            for (String fileName : screenNames) {
-                if (fileName != null &&
-                        (fileName.contains("_fragment") ||
-                                fileName.contains("_dialog_fragment") ||
-                                fileName.contains("_bottomdialog_fragment"))) {
-                    return true;
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return false;
     }
 
     /**

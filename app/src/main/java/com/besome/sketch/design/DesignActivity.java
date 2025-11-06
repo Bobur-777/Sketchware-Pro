@@ -1072,6 +1072,7 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
 
         private void doInBackground() {
             DesignActivity activity = getActivity();
+            String javaDir = FileUtil.getExternalStorageDir() + "/.sketchware/data/" + sc_id + "/files/java/";
             if (activity == null) return;
 
             try {
@@ -1117,6 +1118,8 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
                 q.f();
                 q.e();
 
+                builder.addAppImports(q.javaFilesPath, q.packageName);
+                builder.addAppImports(javaDir, q.packageName);
                 builder.maybeExtractAapt2();
                 if (canceled) {
                     return;

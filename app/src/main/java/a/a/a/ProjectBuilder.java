@@ -21,6 +21,8 @@ import com.android.sdklib.build.ApkBuilder;
 import com.android.sdklib.build.ApkCreationException;
 import com.android.sdklib.build.DuplicateFileException;
 import com.android.sdklib.build.SealedApkException;
+import com.besome.sketch.beans.ProjectFileBean;
+import com.besome.sketch.design.DesignActivity;
 import com.github.megatronking.stringfog.plugin.StringFogClassInjector;
 import com.github.megatronking.stringfog.plugin.StringFogMappingPrinter;
 import com.iyxan23.zipalignjava.InvalidZipException;
@@ -37,6 +39,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1006,5 +1009,136 @@ public class ProjectBuilder {
 
     public void setBuildAppBundle(boolean buildAppBundle) {
         this.buildAppBundle = buildAppBundle;
+    }
+
+    public static boolean hasFragmentsInProject() {
+        try {
+            ArrayList<String> screenNames = new ArrayList<>();
+            ArrayList<ProjectFileBean> activities = jC.b(DesignActivity.sc_id).b();
+            if (activities != null) {
+                for (ProjectFileBean projectFileBean : activities) {
+                    screenNames.add(projectFileBean.fileName);
+                }
+            }
+            for (String fileName : screenNames) {
+                if (fileName != null &&
+                        (fileName.contains("_fragment") ||
+                                fileName.contains("_dialog_fragment") ||
+                                fileName.contains("_bottomdialog_fragment"))) {
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
+    }
+
+    public void addAppImports(String folderPath, String packageName) throws IOException {
+        File folder = new File(folderPath);
+        if (!folder.exists() || !folder.isDirectory()) return;
+        File[] files = folder.listFiles();
+        if (files == null) return;
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                addAppImports(file.getAbsolutePath(), packageName);
+            } else if (file.getName().endsWith(".java") || file.getName().endsWith(".kt")) {
+                List<String> lines = Files.readAllLines(file.toPath());
+                boolean modified = false;
+                boolean isKotlin = file.getName().endsWith(".kt");
+
+                for (int i = 0; i < lines.size(); i++) {
+                    String line = lines.get(i);
+                    if (line.startsWith("package ")) {
+                        List<String> importsToAdd = new ArrayList<>();
+
+                        String rImport = isKotlin ?
+                                "import " + packageName + ".R" :
+                                "import " + packageName + ".R;";
+                        if (!containsImport(lines, rImport, isKotlin)) {
+                            importsToAdd.add(rImport);
+                        }
+
+                        String wildcardImport = isKotlin ?
+                                "import " + packageName + ".*" :
+                                "import " + packageName + ".*;";
+                        if (!containsImport(lines, wildcardImport, isKotlin)) {
+                            importsToAdd.add(wildcardImport);
+                        }
+
+                        if (settings.getValue(ProjectSettings.SETTING_ENABLE_SUBPACKAGING, ProjectSettings.SETTING_GENERIC_VALUE_FALSE).equals(ProjectSettings.SETTING_GENERIC_VALUE_TRUE)) {
+                            String activityImport = isKotlin ?
+                                    "import " + packageName + ".activity.*" :
+                                    "import " + packageName + ".activity.*;";
+                            if (!containsImport(lines, activityImport, isKotlin)) {
+                                importsToAdd.add(activityImport);
+                            }
+
+                            if (hasFragmentsInProject()) {
+                                String fragmentImport = isKotlin ?
+                                        "import " + packageName + ".fragment.*" :
+                                        "import " + packageName + ".fragment.*;";
+                                if (!containsImport(lines, fragmentImport, isKotlin)) {
+                                    importsToAdd.add(fragmentImport);
+                                }
+                            }
+                        }
+
+                        if (!importsToAdd.isEmpty()) {
+                            StringBuilder importsBuilder = new StringBuilder();
+                            for (String imp : importsToAdd) {
+                                importsBuilder.append("\n").append(imp);
+                            }
+                            lines.add(i + 1, importsBuilder.toString());
+                            modified = true;
+                        }
+                        break;
+                    }
+                }
+                if (modified) {
+                    Files.write(file.toPath(), lines);
+                }
+            }
+        }
+    }
+
+    private boolean containsImport(List<String> lines, String importToCheck, boolean isKotlin) {
+        String searchPattern = importToCheck;
+        if (isKotlin && importToCheck.endsWith(".*")) {
+            searchPattern = importToCheck;
+        }
+
+        for (String line : lines) {
+            String trimmedLine = line.trim();
+            if (trimmedLine.equals(searchPattern) ||
+                    (isKotlin && trimmedLine.equals(importToCheck.replace(";", "")))) {
+                return true;
+            }
+            if (isMoreSpecificImport(trimmedLine, importToCheck, isKotlin)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isMoreSpecificImport(String existingLine, String wildcardImport, boolean isKotlin) {
+        if (!wildcardImport.contains(".*")) return false;
+
+        String wildcardPackage = wildcardImport
+                .replace("import ", "")
+                .replace(".*", "")
+                .replace(";", "")
+                .trim();
+
+        if (existingLine.startsWith("import ") && !existingLine.contains(".*")) {
+            String existingPackage = existingLine
+                    .replace("import ", "")
+                    .replace(";", "")
+                    .trim();
+
+            return existingPackage.startsWith(wildcardPackage + ".");
+        }
+
+        return false;
     }
 }
