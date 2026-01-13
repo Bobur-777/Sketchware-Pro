@@ -3,6 +3,7 @@ package mod.hilal.saif.activities.tools;
 import static com.besome.sketch.editor.view.ViewEditor.shakeView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,6 +26,7 @@ import com.besome.sketch.editor.manage.library.LibraryItemView;
 import com.besome.sketch.help.SystemSettingActivity;
 import com.besome.sketch.lib.base.BaseAppCompatActivity;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.topjohnwu.superuser.Shell;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -50,6 +52,9 @@ import pro.sketchware.utility.FileUtil;
 import pro.sketchware.utility.SketchwareUtil;
 
 public class AppSettings extends BaseAppCompatActivity {
+    private static final String PREFS_NAME = "app_settings";
+    private static final String PREF_IGNORE_OPTIMIZATION_ROOT = "pref_ignore_optimization_root";
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         enableEdgeToEdgeNoContrast();
@@ -91,6 +96,7 @@ public class AppSettings extends BaseAppCompatActivity {
 
     private void setupPreferences(ViewGroup content) {
         var preferences = new ArrayList<LibraryCategoryView>();
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         LibraryCategoryView managersCategory = new LibraryCategoryView(this);
         managersCategory.setTitle("Managers");
@@ -109,6 +115,7 @@ public class AppSettings extends BaseAppCompatActivity {
 
         generalCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_settings_applications, "App settings", "Change general app settings", new ActivityLauncher(new Intent(getApplicationContext(), ConfigActivity.class))), true);
         generalCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_palette, Helper.getResString(R.string.settings_appearance), Helper.getResString(R.string.settings_appearance_description), openSettingsActivity(SettingsActivity.SETTINGS_APPEARANCE_FRAGMENT)), true);
+        generalCategory.addLibraryItem(createRootOptimizationPreference(prefs), true);
         generalCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_folder, "Open working directory", "Open Sketchware Pro's directory and edit files in it", v -> openWorkingDirectory()), true);
         generalCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_apk_document, "Sign an APK file with testkey", "Sign an already existing APK file with testkey and signature schemes up to V4", v -> signApkFileDialog()), true);
         generalCategory.addLibraryItem(createPreference(R.drawable.ic_mtrl_settings, Helper.getResString(R.string.main_drawer_title_system_settings), "Auto-save and vibrations", new ActivityLauncher(new Intent(getApplicationContext(), SystemSettingActivity.class))), false);
@@ -132,6 +139,57 @@ public class AppSettings extends BaseAppCompatActivity {
         preference.description.setText(desc);
         preference.setOnClickListener(listener);
         return preference;
+    }
+
+    private AppSettingsToggleItemView createRootOptimizationPreference(SharedPreferences prefs) {
+        AppSettingsToggleItemView preference = new AppSettingsToggleItemView(this);
+        preference.icon.setImageResource(R.drawable.ic_mtrl_settings);
+        preference.title.setText("Ignore system optimizations (root)");
+        preference.description.setText("Whitelist Sketchware Pro so builds keep running in the background.");
+        preference.setChecked(prefs.getBoolean(PREF_IGNORE_OPTIMIZATION_ROOT, false));
+        preference.setOnCheckedChangeListener((buttonView, isChecked) -> handleRootOptimizationToggle(preference, prefs, isChecked));
+        return preference;
+    }
+
+    private void handleRootOptimizationToggle(AppSettingsToggleItemView preference, SharedPreferences prefs, boolean enabled) {
+        Shell.getShell(shell -> {
+            if (!shell.isRoot()) {
+                runOnUiThread(() -> {
+                    preference.setCheckedSilently(false);
+                    new MaterialAlertDialogBuilder(this)
+                            .setTitle("Root access required")
+                            .setMessage("Root access is required to change system optimization settings.")
+                            .setPositiveButton(R.string.common_word_ok, null)
+                            .show();
+                });
+                return;
+            }
+
+            String packageName = getPackageName();
+            String[] commands = enabled
+                    ? new String[]{
+                    "cmd deviceidle whitelist +" + packageName,
+                    "cmd appops set " + packageName + " RUN_IN_BACKGROUND allow",
+                    "cmd appops set " + packageName + " RUN_ANY_IN_BACKGROUND allow"
+            }
+                    : new String[]{
+                    "cmd deviceidle whitelist -" + packageName,
+                    "cmd appops set " + packageName + " RUN_IN_BACKGROUND default",
+                    "cmd appops set " + packageName + " RUN_ANY_IN_BACKGROUND default"
+            };
+
+            Shell.cmd(commands).submit(result -> runOnUiThread(() -> {
+                if (result.isSuccess()) {
+                    prefs.edit().putBoolean(PREF_IGNORE_OPTIMIZATION_ROOT, enabled).apply();
+                    SketchwareUtil.toast(enabled
+                            ? "Sketchware Pro added to system whitelist."
+                            : "Sketchware Pro removed from system whitelist.");
+                } else {
+                    preference.setCheckedSilently(!enabled);
+                    SketchwareUtil.toastError("Failed to update system optimization settings.");
+                }
+            }));
+        });
     }
 
     private void openWorkingDirectory() {
