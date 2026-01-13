@@ -18,6 +18,8 @@ out/
 # Gradle files
 .gradle/
 build/
+!app/src/main/java/com/besome/sketch/build/
+!app/src/main/java/com/besome/sketch/build/**
 
 # Local configuration file (sdk path, etc)
 local.properties
