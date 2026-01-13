@@ -98,9 +98,8 @@ import mod.hey.studios.util.Helper;
 import mod.hey.studios.util.SystemLogPrinter;
 import mod.hilal.saif.activities.android_manifest.AndroidManifestInjection;
 import mod.hilal.saif.activities.tools.ConfigActivity;
-import com.besome.sketch.build.BuildPipelineRunner;
-import com.besome.sketch.build.BuildWorkManager;
 import com.besome.sketch.build.BuildForegroundService;
+import com.besome.sketch.build.BuildPipelineRunner;
 import mod.jbk.diagnostic.CompileErrorSaver;
 import mod.jbk.util.LogUtil;
 import mod.khaled.logcat.LogReaderActivity;
@@ -639,12 +638,12 @@ public class DesignActivity extends BaseAppCompatActivity implements View.OnClic
         r.a("P1I10", true);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         updateBuildProgress("Starting build...", -1, BuildPipelineRunner.TOTAL_STEPS_DEBUG);
-        BuildWorkManager.enqueueDebugBuild(this, sc_id);
+        ContextCompat.startForegroundService(this, BuildForegroundService.createDebugBuildIntent(this, sc_id));
     }
 
     private void cancelBuild() {
         updateBuildProgress("Canceling build...", -1, BuildPipelineRunner.TOTAL_STEPS_DEBUG);
-        BuildWorkManager.cancelDebugBuild(this, sc_id);
+        ContextCompat.startForegroundService(this, BuildForegroundService.createCancelIntent(this));
     }
 
     private void updateBuildProgress(String progress, int step, int totalSteps) {

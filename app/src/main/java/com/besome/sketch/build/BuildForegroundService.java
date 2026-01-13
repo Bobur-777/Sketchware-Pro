@@ -8,7 +8,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import android.os.PowerManager;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -67,7 +66,6 @@ public class BuildForegroundService extends Service {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final AtomicBoolean canceled = new AtomicBoolean(false);
     private NotificationManager notificationManager;
-    private PowerManager.WakeLock wakeLock;
 
     public static Intent createDebugBuildIntent(Context context, String scId) {
         Intent intent = new Intent(context, BuildForegroundService.class);
@@ -104,11 +102,6 @@ public class BuildForegroundService extends Service {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         createNotificationChannelIfNeeded();
-        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        if (powerManager != null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SketchwarePro:BuildPipeline");
-            wakeLock.setReferenceCounted(false);
-        }
     }
 
     @Override
@@ -150,15 +143,12 @@ public class BuildForegroundService extends Service {
         super.onDestroy();
         executorService.shutdownNow();
         isRunning.set(false);
-        releaseWakeLock();
     }
 
     private void runBuild(Intent intent) {
-        acquireWakeLock();
         String scId = intent.getStringExtra(EXTRA_SC_ID);
         String buildType = intent.getStringExtra(EXTRA_BUILD_TYPE);
         if (scId == null || buildType == null) {
-            releaseWakeLock();
             stopSelfSafely();
             return;
         }
@@ -208,7 +198,6 @@ public class BuildForegroundService extends Service {
             sendErrorBroadcast(scId, buildType, ERROR_TYPE_GENERIC, throwable.getMessage(), android.util.Log.getStackTraceString(throwable));
         } finally {
             stopForeground(STOP_FOREGROUND_REMOVE);
-            releaseWakeLock();
             stopSelfSafely();
         }
     }
@@ -296,17 +285,5 @@ public class BuildForegroundService extends Service {
     private void stopSelfSafely() {
         isRunning.set(false);
         stopSelf();
-    }
-
-    private void acquireWakeLock() {
-        if (wakeLock != null && !wakeLock.isHeld()) {
-            wakeLock.acquire();
-        }
-    }
-
-    private void releaseWakeLock() {
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
     }
 }
