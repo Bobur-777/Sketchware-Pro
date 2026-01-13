@@ -5,7 +5,6 @@ import android.content.Context;
 import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.OutOfQuotaPolicy;
 import androidx.work.WorkManager;
 
 import a.a.a.yq;
@@ -22,7 +21,6 @@ public final class BuildWorkManager {
         OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BuildWorker.class)
                 .setInputData(input)
                 .addTag(debugTag(scId))
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build();
         WorkManager.getInstance(context).enqueueUniqueWork(debugTag(scId), ExistingWorkPolicy.REPLACE, request);
     }
@@ -43,7 +41,6 @@ public final class BuildWorkManager {
         OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BuildWorker.class)
                 .setInputData(input)
                 .addTag(exportTag(scId))
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build();
         WorkManager.getInstance(context).enqueueUniqueWork(exportTag(scId), ExistingWorkPolicy.REPLACE, request);
     }

@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -42,7 +43,6 @@ import a.a.a.yq;
 import mod.hey.studios.util.Helper;
 import mod.jbk.export.GetKeyStoreCredentialsDialog;
 import com.besome.sketch.build.BuildForegroundService;
-import com.besome.sketch.build.BuildWorkManager;
 import pro.sketchware.R;
 import pro.sketchware.utility.FilePathUtil;
 import pro.sketchware.utility.FileUtil;
@@ -405,7 +405,7 @@ public class ExportProjectActivity extends BaseAppCompatActivity {
         String aliasPassword = credentials != null && !signWithTestkey ? credentials.getKeyPassword() : null;
         String signingAlgorithm = credentials != null ? credentials.getSigningAlgorithm() : null;
 
-        BuildWorkManager.enqueueExportBuild(
+        Intent intent = BuildForegroundService.createExportBuildIntent(
                 this,
                 sc_id,
                 exportType,
@@ -417,6 +417,7 @@ public class ExportProjectActivity extends BaseAppCompatActivity {
                 aliasPassword,
                 signingAlgorithm
         );
+        ContextCompat.startForegroundService(this, intent);
     }
 
     private void handleExportCancel(DialogInterface dialog) {
@@ -424,7 +425,7 @@ public class ExportProjectActivity extends BaseAppCompatActivity {
             progressDialog.setCancelable(true);
             progressDialog.setOnCancelListener(this::handleExportCancel);
             a("Canceling process...");
-            BuildWorkManager.cancelExportBuild(this, sc_id);
+            ContextCompat.startForegroundService(this, BuildForegroundService.createCancelIntent(this));
         }
     }
 

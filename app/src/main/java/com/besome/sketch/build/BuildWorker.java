@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
 import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
@@ -65,16 +64,7 @@ public class BuildWorker extends Worker {
             return Result.failure();
         }
 
-        try {
-            setForegroundAsync(new ForegroundInfo(
-                    NOTIFICATION_ID,
-                    buildNotification("Starting build..."),
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            )).get();
-        } catch (Exception exception) {
-            releaseWakeLock();
-            return Result.failure();
-        }
+        setForegroundAsync(new ForegroundInfo(NOTIFICATION_ID, buildNotification("Starting build...")));
 
         BuildCancellationToken cancellationToken = this::isStopped;
         BuildProgressReceiver receiver = (progress, step) -> {
