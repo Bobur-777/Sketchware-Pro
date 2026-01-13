@@ -118,6 +118,7 @@ dependencies {
 
     implementation libs.libsu
     implementation libs.insetter
+    implementation libs.androidx.work.runtime
 
     implementation(libs.javaparser.symbol.solver) {
         exclude group: "com.google.guava", module: "guava"
